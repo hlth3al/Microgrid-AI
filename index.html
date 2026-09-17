@@ -1,469 +1,434 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>پنل فرماندهی عملیات بهینه‌سازی بار و مدیریت ریزشبکه‌های هیبریدی صنعتی (Microgrid Dispatch & Peak Shaving) | حسین لعلیان</title>
-  <style>
-    :root {
-      --bg: #070c14;
-      --card-bg: #0e1726;
-      --card-border: #1e293b;
-      --primary: #38bdf8;
-      --emerald: #10b981;
-      --amber: #f59e0b;
-      --rose: #f43f5e;
-      --purple: #a855f7;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-    }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      padding: 16px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    header {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 25px rgba(0,0,0,0.6);
-    }
-    .header-top {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
-    h1 {
-      font-size: 1.15rem;
-      line-height: 1.6;
-      color: #fff;
-      margin-bottom: 6px;
-    }
-    .subtitle {
-      font-size: 0.88rem;
-      color: var(--primary);
-      font-weight: 600;
-    }
-    .badges {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .badge {
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-    .badge-anfis {
-      background: rgba(168, 85, 247, 0.15);
-      color: var(--purple);
-      border: 1px solid rgba(168, 85, 247, 0.3);
-    }
-    .badge-grid {
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--emerald);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-    .badge-hil {
-      background: rgba(56, 189, 248, 0.15);
-      color: var(--primary);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-    }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 14px;
-    }
-    .metric-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .metric-label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-    .metric-value {
-      font-size: 1.45rem;
-      font-weight: 800;
-      color: #fff;
-    }
-    .metric-desc {
-      font-size: 0.75rem;
-      color: var(--primary);
-    }
-
-    .main-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 14px;
-    }
-    @media (max-width: 950px) {
-      .main-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-    .panel-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .panel-header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 8px;
-    }
-    .panel-card h3 {
-      font-size: 0.95rem;
-      color: var(--primary);
-    }
-    .test-btn {
-      background: #1e293b;
-      border: 1px solid var(--purple);
-      color: var(--purple);
-      padding: 5px 14px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      font-weight: 700;
-      transition: all 0.2s;
-    }
-    .test-btn:hover {
-      background: var(--purple);
-      color: #fff;
-    }
-    canvas {
-      width: 100%;
-      height: 230px;
-      background: #050811;
-      border-radius: 8px;
-      border: 1px solid #16243d;
-    }
-    .terminal {
-      background: #050811;
-      border: 1px solid #16243d;
-      border-radius: 8px;
-      padding: 12px;
-      font-family: monospace;
-      font-size: 0.78rem;
-      color: #38bdf8;
-      height: 230px;
-      overflow-y: auto;
-      line-height: 1.7;
-    }
-
-    .sources-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-    }
-    .source-box {
-      background: #09101d;
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 12px;
-    }
-    .source-title {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-    }
-    .source-power {
-      font-size: 1.15rem;
-      font-weight: bold;
-      color: #fff;
-    }
-    .source-status {
-      font-size: 0.72rem;
-      color: var(--emerald);
-      margin-top: 4px;
-    }
-
-    .disclaimer-card {
-      background: #080d1a;
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 16px;
-    }
-    .disclaimer-title {
-      font-size: 0.9rem;
-      font-weight: bold;
-      color: var(--amber);
-      margin-bottom: 8px;
-    }
-    .disclaimer-text {
-      font-size: 0.84rem;
-      line-height: 1.8;
-      color: #cbd5e1;
-      text-align: justify;
-    }
-    footer {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 16px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-    footer a {
-      color: var(--primary);
-      text-decoration: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل فرماندهی بهینه‌سازی بار و ریزشبکه صنعتی | حسین لعلیان</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Vazirmatn Font CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+    <style>
+        body {
+            font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+            background-color: #0b1120;
+            color: #e2e8f0;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(56, 189, 248, 0.15);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
+        }
+        .glow-btn:hover {
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+        }
+        /* Modal Transitions */
+        .modal {
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .modal-content {
+            transform: scale(0.95);
+            transition: transform 0.25s ease;
+        }
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+        /* Custom scrollbar for logs & modals */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0284c7;
+            border-radius: 4px;
+        }
+    </style>
 </head>
-<body>
+<body class="min-h-screen p-3 md:p-6 flex flex-col justify-between">
 
-  <header>
-    <div class="header-top">
-      <div>
-        <h1>پنل فرماندهی عملیات بهینه‌سازی بار و مدیریت ریزشبکه‌های هیبریدی صنعتی (Microgrid Dispatch & Peak Shaving)</h1>
-        <div class="subtitle">طراحی و توسعه مهندسی: حسین لعلیان (رتبه ۳۲ کنکور دکتری)</div>
-      </div>
-      <div class="badges">
-        <span class="badge badge-anfis">● ANFIS & METAHEURISTICS</span>
-        <span class="badge badge-grid">GRID-TIED / ISLANDED: AUTO</span>
-        <span class="badge badge-hil">SIMULINK / HIL COMPLIANT</span>
-      </div>
+    <!-- Top Header -->
+    <header class="mb-4 glass-panel rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between border-b border-cyan-500/30 glow-cyan">
+        <div class="flex items-center space-x-3 space-x-reverse mb-3 md:mb-0">
+            <div class="w-4 h-4 rounded-full bg-emerald-400 animate-pulse"></div>
+            <div>
+                <h1 class="text-lg md:text-xl font-black text-cyan-400">
+                    فرماندهی بهینه‌سازی بار و مدیریت ریزشبکه‌های هیبریدی صنعتی
+                </h1>
+                <p class="text-xs text-slate-400">
+                    Microgrid Economic Dispatch & Dynamic Peak Shaving System | حسین لعلیان
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-cyan-950 text-cyan-300 border border-cyan-700/50">
+                وضعیت: لایو دیسپاچینگ لبه
+            </span>
+            <span id="clock" class="text-xs font-mono text-cyan-200">--:--:--</span>
+        </div>
+    </header>
+
+    <!-- ⚡ Quick Action Dock (دکمه‌های ۵ گانه تعاملی جلسه با مشتری) -->
+    <section class="mb-6">
+        <div class="glass-panel p-3 rounded-2xl border border-cyan-500/30">
+            <div class="flex items-center justify-between mb-2 px-1">
+                <span class="text-xs font-bold text-amber-400 flex items-center gap-1">
+                    ⚡ دسترسی سریع مشتری و کارفرما (بررسی طرح، مکانیزم، عملیات و قرارداد):
+                </span>
+                <span class="text-[11px] text-slate-400">روی هر دکمه کلیک کنید</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                <!-- دکمه ۱ -->
+                <button onclick="openModal('modal-1')" class="glow-btn px-3 py-2.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-200 text-xs font-bold transition flex flex-col items-center text-center gap-1">
+                    <span class="text-base">📄</span>
+                    <span>۱. طرح توجیهی عملیاتی</span>
+                </button>
+                <!-- دکمه ۲ -->
+                <button onclick="openModal('modal-2')" class="glow-btn px-3 py-2.5 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-200 text-xs font-bold transition flex flex-col items-center text-center gap-1">
+                    <span class="text-base">⚙️</span>
+                    <span>۲. مکانیزم و ارزش افزوده</span>
+                </button>
+                <!-- دکمه ۳ -->
+                <button onclick="openModal('modal-3')" class="glow-btn px-3 py-2.5 rounded-xl bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-500/40 text-indigo-200 text-xs font-bold transition flex flex-col items-center text-center gap-1">
+                    <span class="text-base">🚀</span>
+                    <span>۳. مسیر عملیاتی پنل</span>
+                </button>
+                <!-- دکمه ۴ -->
+                <button onclick="openModal('modal-4')" class="glow-btn px-3 py-2.5 rounded-xl bg-amber-950/80 hover:bg-amber-900 border border-amber-500/40 text-amber-200 text-xs font-bold transition flex flex-col items-center text-center gap-1">
+                    <span class="text-base">📝</span>
+                    <span>۴. نکات کلیدی قرارداد</span>
+                </button>
+                <!-- دکمه ۵ -->
+                <button onclick="openModal('modal-5')" class="glow-btn px-3 py-2.5 rounded-xl bg-purple-950/80 hover:bg-purple-900 border border-purple-500/40 text-purple-200 text-xs font-bold transition flex flex-col items-center text-center gap-1">
+                    <span class="text-base">💼</span>
+                    <span>۵. مدل‌های پیشنهادی ما</span>
+                </button>
+                <!-- دکمه تکمیلی ۶: مراجع قانونی و حضوری -->
+                <button onclick="openModal('modal-6')" class="glow-btn px-3 py-2.5 rounded-xl bg-rose-950/80 hover:bg-rose-900 border border-rose-500/40 text-rose-200 text-xs font-bold transition flex flex-col items-center text-center gap-1">
+                    <span class="text-base">🏢</span>
+                    <span>۶. مراجع حضوری و قانونی</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Performance Indicators (KPIs) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-cyan-400">
+            <div class="text-xs text-slate-400">توان کل بار مصرفی مجتمع (Total Load)</div>
+            <div id="val-load" class="text-2xl font-black text-white mt-1">۲.۴۸ MW</div>
+            <div class="text-[11px] text-cyan-400 mt-1">پایش بلادرنگ پیوستگی توان اکتیو/راکتیو</div>
+        </div>
+        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-emerald-400">
+            <div class="text-xs text-slate-400">نرخ پیک‌سایی هوشمند (Peak Shaving)</div>
+            <div id="val-shaving" class="text-2xl font-black text-emerald-400 mt-1">۳۱.۵ ٪</div>
+            <div class="text-[11px] text-emerald-300 mt-1">مهار بار فراتر از دیماند جریمه‌دار</div>
+        </div>
+        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-amber-400">
+            <div class="text-xs text-slate-400">وضعیت ذخیره‌ساز باتری (BESS SoC)</div>
+            <div id="val-soc" class="text-2xl font-black text-amber-400 mt-1">۸۴.۲ ٪</div>
+            <div class="text-[11px] text-amber-300 mt-1">توان تزریقی: ۰.۸۵ MW | آماده دیسپاچ</div>
+        </div>
+        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-indigo-400">
+            <div class="text-xs text-slate-400">پایداری فرکانس و توان (Grid Stability)</div>
+            <div class="text-2xl font-black text-indigo-300 mt-1">۵۰.۰۲ Hz | ۰.۹۸</div>
+            <div class="text-[11px] text-indigo-200 mt-1">کنترل تطبیقی اینورترهای لبه هوش مصنوعی</div>
+        </div>
     </div>
-  </header>
 
-  <div class="metrics-grid">
-    <div class="metric-card">
-      <div class="metric-label">توان کل بار مصرفی مجتمع (Total Load Demand)</div>
-      <div class="metric-value" id="totalDemand">۲.۴۸ MW</div>
-      <div class="metric-desc">پایش بلادرنگ پیوستگی توان اکتیو و راکتیو</div>
+    <!-- Live Energy Sources & Dispatch Status -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div class="glass-panel p-3 rounded-lg border border-slate-700">
+            <div class="text-xs text-slate-400">مزرعه خورشیدی (PV)</div>
+            <div id="val-pv" class="text-lg font-bold text-amber-300 mt-0.5">۱.۱۵ MW</div>
+            <div class="text-[10px] text-emerald-400">● MPPT ره‌گیری بیشینه توان</div>
+        </div>
+        <div class="glass-panel p-3 rounded-lg border border-slate-700">
+            <div class="text-xs text-slate-400">توربین بادی لبه (Wind)</div>
+            <div id="val-wind" class="text-lg font-bold text-sky-300 mt-0.5">۰.۶۲ MW</div>
+            <div class="text-[10px] text-emerald-400">● زاویه پره بهینه (Pitch Active)</div>
+        </div>
+        <div class="glass-panel p-3 rounded-lg border border-slate-700">
+            <div class="text-xs text-slate-400">ذخیره‌ساز لیتیومی (BESS)</div>
+            <div id="val-bess" class="text-lg font-bold text-cyan-300 mt-0.5">۰.۸۵ MW (دشارژ)</div>
+            <div class="text-[10px] text-cyan-400">● کنترل فازی ANFIS</div>
+        </div>
+        <div class="glass-panel p-3 rounded-lg border border-slate-700">
+            <div class="text-xs text-slate-400">ژنراتور پشتیبان (CHP)</div>
+            <div class="text-lg font-bold text-slate-400 mt-0.5">۰.۰۰ MW</div>
+            <div class="text-[10px] text-amber-400">○ آماده‌باش اقتصادی (Standby)</div>
+        </div>
     </div>
 
-    <div class="metric-card">
-      <div class="metric-label">نرخ پیک‌سایی هوشمند (Peak Shaving Rate)</div>
-      <div class="metric-value" style="color: var(--emerald);" id="peakShave">۳۱.۵ ٪</div>
-      <div class="metric-desc">کاهش بار تحمیلی به شبکه در اوج مصرف</div>
+    <!-- Main Live Simulation Chart & Log Console -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div class="lg:col-span-2 glass-panel p-4 rounded-2xl">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-bold text-cyan-300">
+                    شبیه‌سازی دینامیک پروفایل بار، پیش‌بینی الگوریتم و پیک‌سایی لایو
+                </h3>
+                <span class="text-[11px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-cyan-800">
+                    Simulink Digital Twin Co-Simulation
+                </span>
+            </div>
+            <div class="h-64 sm:h-72">
+                <canvas id="dispatchChart"></canvas>
+            </div>
+        </div>
+
+        <div class="glass-panel p-4 rounded-2xl flex flex-col">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-bold text-cyan-300">لاگ دیسپاچینگ اقتصادی لبه</h3>
+                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            </div>
+            <div id="logConsole" class="flex-1 overflow-y-auto font-mono text-[11px] text-slate-300 space-y-1.5 p-2 bg-slate-950/60 rounded-xl border border-slate-800 max-h-64">
+                <div class="text-emerald-400">[سیستم] بهینه‌ساز فراابتکاری با گام زمانی ۱ ثانیه فعال شد.</div>
+                <div class="text-cyan-400">[ANFIS] مدل استنتاج فازی-عصبی روی حداقل‌سازی هزینه هر kWh تنظیم شد.</div>
+                <div class="text-amber-400">[پیک‌سایی] سقف دیماند مجاز شبکه روی ۱.۵ مگاوات قفل گردید.</div>
+                <div class="text-sky-400">[HIL] ارتباط داده‌های دوقلوی دیجیتال با شبیه‌ساز در حالت نرمال.</div>
+            </div>
+        </div>
     </div>
 
-    <div class="metric-card">
-      <div class="metric-label">وضعیت ذخیره‌ساز باتری (BESS - SoC)</div>
-      <div class="metric-value" style="color: var(--primary);" id="bessSoc">۸۴.۲ ٪</div>
-      <div class="metric-desc">توان تزریقی: ۰.۸۵ MW | آماده دیسپاچ فوری</div>
+    <!-- Legal & Technical Demo Statement -->
+    <footer class="glass-panel p-4 rounded-2xl text-[11px] text-slate-400 leading-relaxed border border-slate-800">
+        <span class="text-amber-400 font-bold">بیانیه حقوقی و فنی سیستم (Demo Verification):</span>
+        جهت ممانعت از کپی‌برداری غیرمجاز و حفظ حقوق مالکیت فکری، این نسخه ارائه‌شده صرفاً یک دمو با داده‌های نمونه و تقلیل‌یافته (Synthetic/Minimal) می‌باشد. در صورت ثبت سفارش صنعتی، پنل نهایی به‌صورت تکاملی توسعه یافته و از طریق پروتکل‌های سخت‌افزاری صنعتی (HIL) به لبه‌های هوش مصنوعی فدرال پردازشی واقعی (Real-Time Sensors Edge) و داده‌های مدل‌های شبیه‌ساز Simulink متصل می‌گردد تا کمترین ضریب خطا محاسبه نماید.
+    </footer>
+
+    <!-- ==================== MODALS (دیالوگ‌های راهنمای مشتری) ==================== -->
+
+    <!-- Modal 1: طرح توجیهی عملیاتی -->
+    <div id="modal-1" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm opacity-0 invisible pointer-events-none">
+        <div class="modal-content glass-panel border border-cyan-400/50 rounded-2xl max-w-2xl w-full p-6 text-slate-200 relative max-h-[85vh] overflow-y-auto">
+            <button onclick="closeModal('modal-1')" class="absolute top-4 left-4 text-slate-400 hover:text-white text-xl">✕</button>
+            <div class="flex items-center gap-2 text-cyan-400 text-lg font-black mb-3 border-b border-cyan-500/20 pb-2">
+                <span>📄</span>
+                <h2>طرح توجیهی عملیاتی: کاهش فوری هزینه‌های دیماند و مدیریت بحران برق</h2>
+            </div>
+            <div class="space-y-4 text-xs sm:text-sm leading-relaxed text-slate-300">
+                <p class="font-bold text-cyan-200">معرفی پنل دیسپاچینگ و بهینه‌سازی بار ریزشبکه صنعتی (Microgrid-AI)</p>
+                <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                    <span class="text-amber-400 font-bold block mb-1">صنایع کشور امروز با دو تهدید مالی و عملیاتی جدی مواجهند:</span>
+                    <ol class="list-decimal list-inside space-y-1 text-slate-300">
+                        <li>خسارت توقف خط تولید ناشی از محدودیت‌ها و قطعی‌های برنامه‌ریزی‌شده برق.</li>
+                        <li>قبوض سرسام‌آور ناشی از جرایم تجاوز از دیماند قراردادی و تعرفه‌های تصاعدی ساعات اوج بار (پیک).</li>
+                    </ol>
+                </div>
+                <p class="text-emerald-300">
+                    ✔ <strong>رسالت سامانه:</strong> پیاده‌سازی مغز متفکر نرم‌افزاری روی شبکه برق داخلی کارخانه برای تثبیت مصرف، حذف جریمه دیماند و اولویت‌بندی مصرف ارزان‌ترین منبع برق در هر ساعت از شبانه‌روز.
+                </p>
+                <div class="bg-cyan-950/40 p-3 rounded-xl border border-cyan-700/30">
+                    <span class="text-cyan-300 font-bold block mb-1">این داشبورد روی شبکه چه کاری انجام می‌دهد؟</span>
+                    <p class="mb-2"><strong>حذف هوشمند پیک مصرف (Peak Shaving):</strong> زمانی که مصرف خطوط به سقف دیماند مجاز نزدیک می‌شود، پنل بلافاصله باتری‌ها (BESS) یا ژنراتور پشتیبان را وارد مدار می‌کند تا از شبکه سراسری جریمه دیماند دریافت نشود.</p>
+                    <p><strong>تخصیص اقتصادی منابع انرژی:</strong> در هر لحظه، بسته به تعرفه شبکه و پیش‌بینی تابش، ارزان‌ترین ترکیب منابع (پنل خورشیدی، باتری، ژنراتور اختصاصی یا برق شبکه) وارد خط می‌شود.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="metric-card">
-      <div class="metric-label">پایداری فرکانس و ضریب توان (Grid Stability)</div>
-      <div class="metric-value" id="freqCos">۵۰.۰۲ Hz | ۰.۹۸</div>
-      <div class="metric-desc">کنترل تطبیقی اینورترهای لبه هوش مصنوعی</div>
-    </div>
-  </div>
-
-  <div class="sources-grid">
-    <div class="source-box">
-      <div class="source-title">مزرعه خورشیدی (PV Array)</div>
-      <div class="source-power" id="pvPower">۱.۱۵ MW</div>
-      <div class="source-status">● MPPT ره‌گیری بیشینه توان</div>
-    </div>
-    <div class="source-box">
-      <div class="source-title">توربین‌های بادی لبه (Wind Gen)</div>
-      <div class="source-power" id="windPower">۰.۶۲ MW</div>
-      <div class="source-status">● زاویه پره بهینه (Pitch Active)</div>
-    </div>
-    <div class="source-box">
-      <div class="source-title">ذخیره‌ساز لیتیومی (BESS)</div>
-      <div class="source-power" id="bessPower">۰.۸۵ MW (دشارژ)</div>
-      <div class="source-status" style="color: var(--purple);">● کنترل فازی ANFIS</div>
-    </div>
-    <div class="source-box">
-      <div class="source-title">ژنراتور گازسوز پشتیبان (CHP)</div>
-      <div class="source-power" id="chpPower">۰.۰۰ MW</div>
-      <div class="source-status" style="color: var(--amber);">○ آماده‌باش (Standby)</div>
-    </div>
-  </div>
-
-  <div class="main-grid">
-    <div class="panel-card">
-      <div class="panel-header-row">
-        <h3>شبیه‌سازی دینامیک پروفایل بار، پیش‌بینی الگوریتم فراابتکاری و پیک‌سایی لایو</h3>
-        <button class="test-btn" onclick="triggerPeakSurge()">تزریق شوک بار پیک (Surge Test)</button>
-      </div>
-      <canvas id="dispatchCanvas"></canvas>
+    <!-- Modal 2: مکانیزم کاری و ارزش پیشنهادی -->
+    <div id="modal-2" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm opacity-0 invisible pointer-events-none">
+        <div class="modal-content glass-panel border border-emerald-400/50 rounded-2xl max-w-2xl w-full p-6 text-slate-200 relative max-h-[85vh] overflow-y-auto">
+            <button onclick="closeModal('modal-2')" class="absolute top-4 left-4 text-slate-400 hover:text-white text-xl">✕</button>
+            <div class="flex items-center gap-2 text-emerald-400 text-lg font-black mb-3 border-b border-emerald-500/20 pb-2">
+                <span>⚙️</span>
+                <h2>مکانیزم کاری و ارزش پیشنهادی سیستم</h2>
+            </div>
+            <div class="space-y-3 text-xs sm:text-sm leading-relaxed text-slate-300">
+                <div class="bg-rose-950/40 p-3 rounded-xl border border-rose-800/40">
+                    <strong class="text-rose-300">مسئله روز صنعت:</strong>
+                    تحمیل خسارات ناشی از قطعی برق تابستان، جرایم سنگین تجاوز از دیماند، و افزایش پلکانی تعرفه اوج بار شبکه.
+                </div>
+                <div class="space-y-2">
+                    <p class="text-emerald-300 font-bold">راهکار سامانه ما:</p>
+                    <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                        <strong class="text-cyan-300">۱. دیده‌بانی یکپارچه:</strong>
+                        پایش و مدل‌سازی در لحظه بار خطوط، تولید نیروگاه خورشیدی، سطح شارژ باتری‌ها (SOC) و ژنراتورهای پشتیبان.
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                        <strong class="text-cyan-300">۲. حذف پیک مصرف (Peak Shaving):</strong>
+                        مهار خودکار دیماند فراتر از مرز مجاز از طریق تخلیه هوشمند باتری و مدیریت ژنراتور اختصاصی جهت حذف صددرصدی جرایم دیماند.
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                        <strong class="text-cyan-300">۳. دیسپاچینگ اقتصادی (Economic Dispatch):</strong>
+                        تخصیص بهینه منابع تولید در هر ساعت بر پایه کمترین بهای تمام‌شده کیلووات‌ساعت مصرفی.
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                        <strong class="text-cyan-300">۴. ارتباط مستقیم صنعتی:</strong>
+                        قابلیت اتصال خروجی پلتفرم از طریق Industrial IoT و پروتکل‌های استاندارد صنعتی (Modbus/MQTT) به سامانه‌های SCADA و PLCها جهت صدور فرامین کنترلی.
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="panel-card">
-      <div class="panel-header-row">
-        <h3>لاگ دیسپاچینگ اقتصادی و تصمیم‌گیری لبه</h3>
-      </div>
-      <div class="terminal" id="dispatchLogs">
-        <div>[سیستم] بهینه‌ساز فراابتکاری دیسپاچینگ بار با گام زمانی ۱ ثانیه فعال است.</div>
-        <div>[ANFIS] مدل استنتاج فازی-عصبی روی حداقل‌سازی هزینه هر کیلووات ساعت ست شد.</div>
-        <div>[پیک‌سایی] سقف تبادل مجاز با شبکه سراسری روی ۱.۵ مگاوات قفل شد.</div>
-        <div>[HIL] ارتباط داده‌های دوقلوی دیجیتال با شبیه‌ساز Simulink در حالت نرمال.</div>
-      </div>
+    <!-- Modal 3: مسیر عملیاتی پنل -->
+    <div id="modal-3" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm opacity-0 invisible pointer-events-none">
+        <div class="modal-content glass-panel border border-indigo-400/50 rounded-2xl max-w-2xl w-full p-6 text-slate-200 relative max-h-[85vh] overflow-y-auto">
+            <button onclick="closeModal('modal-3')" class="absolute top-4 left-4 text-slate-400 hover:text-white text-xl">✕</button>
+            <div class="flex items-center gap-2 text-indigo-400 text-lg font-black mb-3 border-b border-indigo-500/20 pb-2">
+                <span>🚀</span>
+                <h2>مسیر عملیاتی و فرآیند پردازش الگوریتم‌ها</h2>
+            </div>
+            <div class="space-y-3 text-xs sm:text-sm leading-relaxed text-slate-300">
+                <div class="p-3 bg-slate-900/90 rounded-xl border border-indigo-900/40">
+                    <h4 class="font-bold text-indigo-300 mb-1">۱. دیده‌بانی چندمنظوره (Multi-Telemetry):</h4>
+                    <p class="text-slate-300">سیستم ما در لحظه پارامترهای بار مصرفی خطوط تولید، پیش‌بینی تولید خورشیدی، وضعیت شارژ باتری‌ها (BESS) و وضعیت ژنراتورهای گازسوز/دیزلی را مانیتور می‌کند.</p>
+                </div>
+                <div class="p-3 bg-slate-900/90 rounded-xl border border-indigo-900/40">
+                    <h4 class="font-bold text-indigo-300 mb-1">۲. الگوریتم کاهش دیماند اوج (Peak Shaving):</h4>
+                    <p class="text-slate-300">وقتی مصرف کارخانه به مرز دیماند جریمه‌دار نزدیک می‌شود یا در ساعات پیک گران‌قیمت شبکه هستیم، سیستم فوراً و خودکار، باتری‌ها و منابع پشتیبان را وارد مدار می‌کند تا سقف مصرف از شبکه افزایش نیابد.</p>
+                </div>
+                <div class="p-3 bg-slate-900/90 rounded-xl border border-indigo-900/40">
+                    <h4 class="font-bold text-indigo-300 mb-1">۳. دیسپاچینگ بهینه اقتصادی:</h4>
+                    <p class="text-slate-300">مشخص می‌کند در هر ساعت مشخص، برق از کدام منبع تأمین شود (خورشیدی مستقیم، تخلیه باتری، ژنراتور اختصاصی یا شبکه سراسری) تا بهای تمام‌شده هر کیلووات‌ساعت مصرفی خط به کمترین حد ممکن برسد.</p>
+                </div>
+                <div class="p-3 bg-slate-900/90 rounded-xl border border-indigo-900/40">
+                    <h4 class="font-bold text-indigo-300 mb-1">۴. خروجی آماده کنترل صنعتی (Edge Command):</h4>
+                    <p class="text-slate-300">این داشبورد فقط یک صفحه نمایش نیست؛ API و خروجی‌های فرمانی آن می‌توانند مستقیماً به PLCها، سیستم‌های SCADA، و رله‌های کنترلی کارخانه فرمان قطع و وصل یا تغییر ست‌پوینت اینورترها را صادر کنند.</p>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div class="disclaimer-card">
-    <div class="disclaimer-title">بیانیه حقوقی و فنی سیستم (Demo Verification):</div>
-    <div class="disclaimer-text">
-      جهت ممانعت از کپی‌برداری غیرمجاز و حفظ حقوق مالکیت فکری، این نسخه ارائه‌شده صرفاً یک دمو با داده‌های نمونه و تقلیل‌یافته (Synthetic/Minimal) می‌باشد. در صورت ثبت سفارش صنعتی، پنل نهایی به‌صورت تکاملی توسعه یافته و از طریق پروتکل‌های سخت‌افزاری صنعتی (HIL) به لبه‌های هوش مصنوعی فدرال پردازشی واقعی (Real-Time Sensors Edge)، داده‌های مدل‌های شبیه‌ساز Simulink متصل می‌گردد تا کمترین ضریب خطا محاسبه نماید. و هر زمان پل واقعی Simulink/HIL و سنسورهای هوش مصنوعی لبه فدرال متصل شوند، سیستم آماده دریافت اطلاعات زنده خواهد بود.
+    <!-- Modal 4: نکات کلیدی قرارداد -->
+    <div id="modal-4" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm opacity-0 invisible pointer-events-none">
+        <div class="modal-content glass-panel border border-amber-400/50 rounded-2xl max-w-2xl w-full p-6 text-slate-200 relative max-h-[85vh] overflow-y-auto">
+            <button onclick="closeModal('modal-4')" class="absolute top-4 left-4 text-slate-400 hover:text-white text-xl">✕</button>
+            <div class="flex items-center gap-2 text-amber-400 text-lg font-black mb-3 border-b border-amber-500/20 pb-2">
+                <span>📝</span>
+                <h2>نکات کلیدی و شفافیت‌های حقوقی قرارداد</h2>
+            </div>
+            <div class="space-y-3 text-xs sm:text-sm leading-relaxed text-slate-300">
+                <div class="p-3 rounded-xl bg-slate-900 border border-amber-500/20">
+                    <h4 class="font-bold text-amber-300 mb-1">۱. محدوده مسئولیت (Disclaimer):</h4>
+                    <p>قید می‌شود که عملکرد سامانه بر مبنای صحت داده‌های سنسورها و ادوات سخت‌افزاری کارخانه است و اختلال فیزیکی تجهیزات (نظیر سوختن اینورتر یا خطای تابلوی برق) خارج از مسئولیت پلتفرم هوشمند است.</p>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900 border border-amber-500/20">
+                    <h4 class="font-bold text-amber-300 mb-1">۲. محرمانگی داده‌ها (NDA):</h4>
+                    <p>داده‌های تولید، مصرف بار خطوط و الگوهای مصرف کارخانه کاملاً محرمانه تلقی شده و امنیت ذخیره‌سازی و ارتباط آن تضمین می‌گردد.</p>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900 border border-amber-500/20">
+                    <h4 class="font-bold text-amber-300 mb-1">۳. فاز پایلوت مشروط (PoC):</h4>
+                    <p>برای شفافیت و جلب اعتماد کامل کارفرما، یک فاز آزمایش ۱ ماهه با تعریف معیارهای ارزیابی شفاف (KPI مشخص مثل درصد پیک شیوینگ محقق‌شده و میزان ریالی کاهش قبض) توافق می‌شود.</p>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <footer>
-    <div>
-      طراحی و توسعه مهندسی: <strong>حسین لعلیان؛ رتبه ۳۲ کنکور دکتری</strong>
+    <!-- Modal 5: مدل‌های پیشنهادی ما -->
+    <div id="modal-5" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm opacity-0 invisible pointer-events-none">
+        <div class="modal-content glass-panel border border-purple-400/50 rounded-2xl max-w-2xl w-full p-6 text-slate-200 relative max-h-[85vh] overflow-y-auto">
+            <button onclick="closeModal('modal-5')" class="absolute top-4 left-4 text-slate-400 hover:text-white text-xl">✕</button>
+            <div class="flex items-center gap-2 text-purple-400 text-lg font-black mb-3 border-b border-purple-500/20 pb-2">
+                <span>💼</span>
+                <h2>مدل‌های مالی و همکاری پیشنهادی</h2>
+            </div>
+            <div class="space-y-4 text-xs sm:text-sm leading-relaxed text-slate-300">
+                <div class="p-3.5 bg-slate-900/90 rounded-xl border border-purple-500/30">
+                    <span class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 text-[11px] font-bold border border-purple-700">مدل اول (پیشنهادی و پرطرفدار)</span>
+                    <h4 class="font-bold text-emerald-300 text-sm mt-1 mb-1">قرارداد تسهیم سود / صرفه‌جویی (Shared Savings / ESCO)</h4>
+                    <p class="text-slate-300">
+                        اگر تمایل به سرمایه‌گذاری اولیه سنگین ندارید، ما پلتفرم را برای دوره ۳ تا ۶ ماه به صورت پایلوت روی سایت شما بالا می‌آوریم. هر میزان پولی که از محل کاهش جرایم دیماند، حذف جریمه پیک بار و بهینه‌سازی مصرف دیزل/باتری در قبض‌های برق شما صرفه‌جویی شد، طبق کنتور مرجع، <strong>۳۰ تا ۴۰ درصد سود صرفه‌جویی</strong> به ما تعلق می‌گیرد و بقیه مستقیماً در جیب شما می‌ماند.
+                    </p>
+                </div>
+                <div class="p-3.5 bg-slate-900/90 rounded-xl border border-slate-700">
+                    <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[11px] font-bold">مدل دوم</span>
+                    <h4 class="font-bold text-cyan-300 text-sm mt-1 mb-1">فروش لایسنس سازمانی (Enterprise License + AMC)</h4>
+                    <p class="text-slate-300">
+                        استقرار محلی (On-Premises) نرم‌افزار روی سرور کارخانه یا سرور اختصاصی شما. هزینه شامل پیاده‌سازی اولیه بر اساس دیاگرام تک‌خطی سایت و قرارداد پشتیبانی سالانه (۱۵ تا ۲۵ درصد) برای کالیبراسیون و نگهداری دائم الگوریتم‌ها.
+                    </p>
+                </div>
+                <div class="p-3.5 bg-slate-900/90 rounded-xl border border-slate-700">
+                    <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[11px] font-bold">مدل سوم</span>
+                    <h4 class="font-bold text-cyan-300 text-sm mt-1 mb-1">اشتراک ابری مانیتورینگ و تصمیم‌گیری (SaaS)</h4>
+                    <p class="text-slate-300">
+                        اتصال امن تجهیزات با اینترنت اشیاء صنعتی (IoT Gateway) به داشبورد و پرداخت حق اشتراک ماهانه یا سالانه متناسب با دیماند و ظرفیت مگاواتی تحت پوشش.
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
-    <div>
-      رایانامه رسمی ارتباطات صنعتی: <a href="mailto:ai.algorithms.ballistics@gmail.com">ai.algorithms.ballistics@gmail.com</a>
+
+    <!-- Modal 6: مراجع حضوری و مجازی -->
+    <div id="modal-6" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm opacity-0 invisible pointer-events-none">
+        <div class="modal-content glass-panel border border-rose-400/50 rounded-2xl max-w-2xl w-full p-6 text-slate-200 relative max-h-[85vh] overflow-y-auto">
+            <button onclick="closeModal('modal-6')" class="absolute top-4 left-4 text-slate-400 hover:text-white text-xl">✕</button>
+            <div class="flex items-center gap-2 text-rose-400 text-lg font-black mb-3 border-b border-rose-500/20 pb-2">
+                <span>🏢</span>
+                <h2>آدرس مراجع حضوری و مجازی جهت پذیرش و عقد قرارداد</h2>
+            </div>
+            <div class="space-y-3 text-xs sm:text-sm leading-relaxed text-slate-300">
+                <div class="p-3 rounded-xl bg-slate-900 border border-rose-900/30">
+                    <strong class="text-rose-300">۱. سازمان ساتبا (انرژی‌های تجدیدپذیر و بهره‌وری):</strong>
+                    <p class="text-slate-400 text-xs mt-0.5">مرجع پیگیری طرح‌های ذخیره‌ساز (BESS) و ماده ۱۶ جهش تولید.</p>
+                    <p class="text-[11px] text-slate-300 mt-1">📍 تهران، شهرک قدس (غرب)، انتهای بلوار دادمان، جنب بزرگراه یادگار امام | وبسایت: <a href="https://satba.gov.ir" target="_blank" class="text-cyan-400 underline">satba.gov.ir</a></p>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900 border border-rose-900/30">
+                    <strong class="text-rose-300">۲. شرکت مدیریت شبکه برق ایران (توانیر / IGMC):</strong>
+                    <p class="text-slate-400 text-xs mt-0.5">پروتکل‌های پاسخگویی بار (Demand Response) و کاهش پیک شبکه.</p>
+                    <p class="text-[11px] text-slate-300 mt-1">📍 تهران، خیابان ولیعصر، بالاتر از میدان ونک، خ شهید رشید یاسمی | وبسایت: <a href="https://www.igmc.ir" target="_blank" class="text-cyan-400 underline">igmc.ir</a></p>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900 border border-rose-900/30">
+                    <strong class="text-rose-300">۳. سازمان صنایع کوچک و شهرک‌های صنعتی ایران:</strong>
+                    <p class="text-slate-400 text-xs mt-0.5">طرح‌های مشترک پایلوت در پست‌ها و خطوط اشتراکی شهرک‌ها.</p>
+                    <p class="text-[11px] text-slate-300 mt-1">📍 تهران، خیابان سمیه، بین مفتح و فرصت، پلاک ۲۵۰ | وبسایت: <a href="https://isipo.ir" target="_blank" class="text-cyan-400 underline">isipo.ir</a></p>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900 border border-rose-900/30">
+                    <strong class="text-rose-300">۴. صنایع بزرگ مصرف‌کننده (فولاد، ریخته‌گری، سیمان، پتروشیمی):</strong>
+                    <p class="text-[11px] text-slate-300 mt-1">دفاتر مرکزی هلدینگ‌ها در تهران و کارخانجات در شهرک‌های صنعتی استان‌های اصفهان، خوزستان، مرکزی، یزد، قزوین و البرز (معاونت فنی / مدیر انرژی).</p>
+                </div>
+            </div>
+        </div>
     </div>
-  </footer>
 
-  <script>
-    const canvas = document.getElementById('dispatchCanvas');
-    const ctx = canvas.getContext('2d');
-    let width, height;
+    <!-- Dynamic JavaScript -->
+    <script>
+        // Modal Handlers
+        function openModal(id) {
+            const m = document.getElementById(id);
+            if(m) {
+                m.classList.add('active');
+            }
+        }
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            if(m) {
+                m.classList.remove('active');
+            }
+        }
+        // Close on background click & Escape key
+        window.addEventListener('click', (e) => {
+            if(e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        });
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+            }
+        });
 
-    function resize() {
-      width = canvas.width = canvas.parentElement.clientWidth - 32;
-      height = canvas.height = 230;
-    }
-    window.addEventListener('resize', resize);
-    resize();
+        // Live Clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('fa-IR');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-    const points = 50;
-    let actualLoad = Array.from({length: points}, () => 2.3 + Math.random() * 0.4);
-    let optimizedGridLoad = actualLoad.map(v => Math.min(v, 1.5));
-    let batteryInjection = actualLoad.map(v => Math.max(0, v - 1.5));
-
-    function draw() {
-      ctx.clearRect(0, 0, width, height);
-
-      // رسم شبکه شطرنجی
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-      ctx.lineWidth = 1;
-      for (let x = 0; x < width; x += 45) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, height);
-        ctx.stroke();
-      }
-      for (let y = 0; y < height; y += 35) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y);
-        ctx.stroke();
-      }
-
-      // رسم خط سقف مصرف شبکه (Peak Threshold)
-      const thresholdY = height - (1.5 / 4.0) * height;
-      ctx.strokeStyle = '#f59e0b';
-      ctx.setLineDash([6, 6]);
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(0, thresholdY);
-      ctx.lineTo(width, thresholdY);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = '#f59e0b';
-      ctx.font = '11px sans-serif';
-      ctx.fillText('سقف مجاز بار شبکه سراسری (Peak Limit: 1.5 MW)', 10, thresholdY - 6);
-
-      // رسم منحنی بار خام بدون بهینه‌سازی (قرمز)
-      ctx.strokeStyle = 'rgba(244, 63, 94, 0.7)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      for (let i = 0; i < points; i++) {
-        const x = (i / (points - 1)) * width;
-        const y = height - (actualLoad[i] / 4.0) * height;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
-      // رسم منحنی بار شبکه پس از پیک‌سایی با هوش مصنوعی (سبز)
-      ctx.strokeStyle = '#10b981';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      for (let i = 0; i < points; i++) {
-        const x = (i / (points - 1)) * width;
-        const y = height - (optimizedGridLoad[i] / 4.0) * height;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
-      // شیفت داده‌ها برای حالت بلادرنگ
-      actualLoad.shift();
-      const nextDemand = 2.3 + Math.sin(Date.now() / 4000) * 0.4 + (Math.random() - 0.5) * 0.2;
-      actualLoad.push(nextDemand);
-
-      optimizedGridLoad.shift();
-      optimizedGridLoad.push(Math.min(nextDemand, 1.5));
-
-      requestAnimationFrame(draw);
-    }
-    draw();
-
-    function triggerPeakSurge() {
-      // تزریق شوک بار سنگین (مثلاً استارت موتورهای بزرگ صنعتی)
-      for (let i = points - 15; i < points; i++) {
-        actualLoad[i] = 3.6 + Math.random() * 0.3;
-      }
-      document.getElementById('totalDemand').innerText = '۳.۸۵ MW (پیک بار سنگین)';
-      document.getElementById('totalDemand').style.color = 'var(--rose)';
-      document.getElementById('peakShave').innerText = '۶۱.۰ ٪ (حداکثر تزریق)';
-      document.getElementById('chpPower').innerText = '۱.۲ MW (وارد مدار شد)';
-      document.getElementById('chpPower').style.color = 'var(--emerald)';
-      document.getElementById('bessPower').innerText = '۱.۱۵ MW (تخلیه اضطراری)';
-
-      const log = document.getElementById('dispatchLogs');
-      const time = new Date().toLocaleTimeString('fa-IR');
-      log.innerHTML = `<div>[${time}] <strong style="color:#f43f5e">⚡ هشدار پیک بار:</strong> مصرف به ۳.۸۵ MW جهش یافت. فعال‌سازی فوری الگوریتم فراابتکاری و تزریق ژنراتور پشتیبان!</div>` + log.innerHTML;
-
-      setTimeout(() => {
-        document.getElementById('totalDemand').innerText = '۲.۴۸ MW';
-        document.getElementById('totalDemand').style.color = '#fff';
-        document.getElementById('peakShave').innerText = '۳۱.۵ ٪';
-        document.getElementById('chpPower').innerText = '۰.۰۰ MW';
-        document.getElementById('chpPower').style.color = '#fff';
-        document.getElementById('bessPower').innerText = '۰.۸۵ MW (دشارژ)';
-        const timeReset = new Date().toLocaleTimeString('fa-IR');
-        log.innerHTML = `<div>[${timeReset}] [دیسپاچینگ] وضعیت بار با موفقیت متعادل و تثبیت شد.</div>` + log.innerHTML;
-      }, 8000);
-    }
-
-    // به‌روزرسانی زنده مقادیر گیج‌ها
-    setInterval(() => {
-      const f = (50.00 + (Math.random() - 0.5) * 0.04).toFixed(2);
-      const pf = (0.97 + Math.random() * 0.02).toFixed(2);
-      document.getElementById('freqCos').innerText = `${f} Hz | ${pf}`;
-    }, 2000);
-  </script>
-</body>
-</html>
+        // Chart Initialization
+        const ctx = document.getElementById('dispatchChart').ge

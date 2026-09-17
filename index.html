@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>پنل فرماندهی عملیات بهینه‌سازی بار و مدیریت ریزشبکه‌های هیبریدی صنعتی (Microgrid Dispatch & Peak Shaving) | حسین لعلیان</title>
+  <style>
+    :root {
+      --bg: #070c14;
+      --card-bg: #0e1726;
+      --card-border: #1e293b;
+      --primary: #38bdf8;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --purple: #a855f7;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    header {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.6);
+    }
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    h1 {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 0.88rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge-anfis {
+      background: rgba(168, 85, 247, 0.15);
+      color: var(--purple);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    .badge-grid {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-hil {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .metric-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .metric-value {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .metric-desc {
+      font-size: 0.75rem;
+      color: var(--primary);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 950px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .panel-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 8px;
+    }
+    .panel-card h3 {
+      font-size: 0.95rem;
+      color: var(--primary);
+    }
+    .test-btn {
+      background: #1e293b;
+      border: 1px solid var(--purple);
+      color: var(--purple);
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .test-btn:hover {
+      background: var(--purple);
+      color: #fff;
+    }
+    canvas {
+      width: 100%;
+      height: 230px;
+      background: #050811;
+      border-radius: 8px;
+      border: 1px solid #16243d;
+    }
+    .terminal {
+      background: #050811;
+      border: 1px solid #16243d;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 0.78rem;
+      color: #38bdf8;
+      height: 230px;
+      overflow-y: auto;
+      line-height: 1.7;
+    }
+
+    .sources-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .source-box {
+      background: #09101d;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .source-title {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .source-power {
+      font-size: 1.15rem;
+      font-weight: bold;
+      color: #fff;
+    }
+    .source-status {
+      font-size: 0.72rem;
+      color: var(--emerald);
+      margin-top: 4px;
+    }
+
+    .disclaimer-card {
+      background: #080d1a;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .disclaimer-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--amber);
+      margin-bottom: 8px;
+    }
+    .disclaimer-text {
+      font-size: 0.84rem;
+      line-height: 1.8;
+      color: #cbd5e1;
+      text-align: justify;
+    }
+    footer {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <div>
+        <h1>پنل فرماندهی عملیات بهینه‌سازی بار و مدیریت ریزشبکه‌های هیبریدی صنعتی (Microgrid Dispatch & Peak Shaving)</h1>
+        <div class="subtitle">طراحی و توسعه مهندسی: حسین لعلیان (رتبه ۳۲ کنکور دکتری)</div>
+      </div>
+      <div class="badges">
+        <span class="badge badge-anfis">● ANFIS & METAHEURISTICS</span>
+        <span class="badge badge-grid">GRID-TIED / ISLANDED: AUTO</span>
+        <span class="badge badge-hil">SIMULINK / HIL COMPLIANT</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-label">توان کل بار مصرفی مجتمع (Total Load Demand)</div>
+      <div class="metric-value" id="totalDemand">۲.۴۸ MW</div>
+      <div class="metric-desc">پایش بلادرنگ پیوستگی توان اکتیو و راکتیو</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">نرخ پیک‌سایی هوشمند (Peak Shaving Rate)</div>
+      <div class="metric-value" style="color: var(--emerald);" id="peakShave">۳۱.۵ ٪</div>
+      <div class="metric-desc">کاهش بار تحمیلی به شبکه در اوج مصرف</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">وضعیت ذخیره‌ساز باتری (BESS - SoC)</div>
+      <div class="metric-value" style="color: var(--primary);" id="bessSoc">۸۴.۲ ٪</div>
+      <div class="metric-desc">توان تزریقی: ۰.۸۵ MW | آماده دیسپاچ فوری</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">پایداری فرکانس و ضریب توان (Grid Stability)</div>
+      <div class="metric-value" id="freqCos">۵۰.۰۲ Hz | ۰.۹۸</div>
+      <div class="metric-desc">کنترل تطبیقی اینورترهای لبه هوش مصنوعی</div>
+    </div>
+  </div>
+
+  <div class="sources-grid">
+    <div class="source-box">
+      <div class="source-title">مزرعه خورشیدی (PV Array)</div>
+      <div class="source-power" id="pvPower">۱.۱۵ MW</div>
+      <div class="source-status">● MPPT ره‌گیری بیشینه توان</div>
+    </div>
+    <div class="source-box">
+      <div class="source-title">توربین‌های بادی لبه (Wind Gen)</div>
+      <div class="source-power" id="windPower">۰.۶۲ MW</div>
+      <div class="source-status">● زاویه پره بهینه (Pitch Active)</div>
+    </div>
+    <div class="source-box">
+      <div class="source-title">ذخیره‌ساز لیتیومی (BESS)</div>
+      <div class="source-power" id="bessPower">۰.۸۵ MW (دشارژ)</div>
+      <div class="source-status" style="color: var(--purple);">● کنترل فازی ANFIS</div>
+    </div>
+    <div class="source-box">
+      <div class="source-title">ژنراتور گازسوز پشتیبان (CHP)</div>
+      <div class="source-power" id="chpPower">۰.۰۰ MW</div>
+      <div class="source-status" style="color: var(--amber);">○ آماده‌باش (Standby)</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="panel-card">
+      <div class="panel-header-row">
+        <h3>شبیه‌سازی دینامیک پروفایل بار، پیش‌بینی الگوریتم فراابتکاری و پیک‌سایی لایو</h3>
+        <button class="test-btn" onclick="triggerPeakSurge()">تزریق شوک بار پیک (Surge Test)</button>
+      </div>
+      <canvas id="dispatchCanvas"></canvas>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-header-row">
+        <h3>لاگ دیسپاچینگ اقتصادی و تصمیم‌گیری لبه</h3>
+      </div>
+      <div class="terminal" id="dispatchLogs">
+        <div>[سیستم] بهینه‌ساز فراابتکاری دیسپاچینگ بار با گام زمانی ۱ ثانیه فعال است.</div>
+        <div>[ANFIS] مدل استنتاج فازی-عصبی روی حداقل‌سازی هزینه هر کیلووات ساعت ست شد.</div>
+        <div>[پیک‌سایی] سقف تبادل مجاز با شبکه سراسری روی ۱.۵ مگاوات قفل شد.</div>
+        <div>[HIL] ارتباط داده‌های دوقلوی دیجیتال با شبیه‌ساز Simulink در حالت نرمال.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer-card">
+    <div class="disclaimer-title">بیانیه حقوقی و فنی سیستم (Demo Verification):</div>
+    <div class="disclaimer-text">
+      جهت ممانعت از کپی‌برداری غیرمجاز و حفظ حقوق مالکیت فکری، این نسخه ارائه‌شده صرفاً یک دمو با داده‌های نمونه و تقلیل‌یافته (Synthetic/Minimal) می‌باشد. در صورت ثبت سفارش صنعتی، پنل نهایی به‌صورت تکاملی توسعه یافته و از طریق پروتکل‌های سخت‌افزاری صنعتی (HIL) به لبه‌های هوش مصنوعی فدرال پردازشی واقعی (Real-Time Sensors Edge)، داده‌های مدل‌های شبیه‌ساز Simulink متصل می‌گردد تا کمترین ضریب خطا محاسبه نماید. و هر زمان پل واقعی Simulink/HIL و سنسورهای هوش مصنوعی لبه فدرال متصل شوند، سیستم آماده دریافت اطلاعات زنده خواهد بود.
+    </div>
+  </div>
+
+  <footer>
+    <div>
+      طراحی و توسعه مهندسی: <strong>حسین لعلیان؛ رتبه ۳۲ کنکور دکتری</strong>
+    </div>
+    <div>
+      رایانامه رسمی ارتباطات صنعتی: <a href="mailto:ai.algorithms.ballistics@gmail.com">ai.algorithms.ballistics@gmail.com</a>
+    </div>
+  </footer>
+
+  <script>
+    const canvas = document.getElementById('dispatchCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+
+    function resize() {
+      width = canvas.width = canvas.parentElement.clientWidth - 32;
+      height = canvas.height = 230;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const points = 50;
+    let actualLoad = Array.from({length: points}, () => 2.3 + Math.random() * 0.4);
+    let optimizedGridLoad = actualLoad.map(v => Math.min(v, 1.5));
+    let batteryInjection = actualLoad.map(v => Math.max(0, v - 1.5));
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+
+      // رسم شبکه شطرنجی
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < width; x += 45) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < height; y += 35) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      // رسم خط سقف مصرف شبکه (Peak Threshold)
+      const thresholdY = height - (1.5 / 4.0) * height;
+      ctx.strokeStyle = '#f59e0b';
+      ctx.setLineDash([6, 6]);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, thresholdY);
+      ctx.lineTo(width, thresholdY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('سقف مجاز بار شبکه سراسری (Peak Limit: 1.5 MW)', 10, thresholdY - 6);
+
+      // رسم منحنی بار خام بدون بهینه‌سازی (قرمز)
+      ctx.strokeStyle = 'rgba(244, 63, 94, 0.7)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < points; i++) {
+        const x = (i / (points - 1)) * width;
+        const y = height - (actualLoad[i] / 4.0) * height;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // رسم منحنی بار شبکه پس از پیک‌سایی با هوش مصنوعی (سبز)
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let i = 0; i < points; i++) {
+        const x = (i / (points - 1)) * width;
+        const y = height - (optimizedGridLoad[i] / 4.0) * height;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // شیفت داده‌ها برای حالت بلادرنگ
+      actualLoad.shift();
+      const nextDemand = 2.3 + Math.sin(Date.now() / 4000) * 0.4 + (Math.random() - 0.5) * 0.2;
+      actualLoad.push(nextDemand);
+
+      optimizedGridLoad.shift();
+      optimizedGridLoad.push(Math.min(nextDemand, 1.5));
+
+      requestAnimationFrame(draw);
+    }
+    draw();
+
+    function triggerPeakSurge() {
+      // تزریق شوک بار سنگین (مثلاً استارت موتورهای بزرگ صنعتی)
+      for (let i = points - 15; i < points; i++) {
+        actualLoad[i] = 3.6 + Math.random() * 0.3;
+      }
+      document.getElementById('totalDemand').innerText = '۳.۸۵ MW (پیک بار سنگین)';
+      document.getElementById('totalDemand').style.color = 'var(--rose)';
+      document.getElementById('peakShave').innerText = '۶۱.۰ ٪ (حداکثر تزریق)';
+      document.getElementById('chpPower').innerText = '۱.۲ MW (وارد مدار شد)';
+      document.getElementById('chpPower').style.color = 'var(--emerald)';
+      document.getElementById('bessPower').innerText = '۱.۱۵ MW (تخلیه اضطراری)';
+
+      const log = document.getElementById('dispatchLogs');
+      const time = new Date().toLocaleTimeString('fa-IR');
+      log.innerHTML = `<div>[${time}] <strong style="color:#f43f5e">⚡ هشدار پیک بار:</strong> مصرف به ۳.۸۵ MW جهش یافت. فعال‌سازی فوری الگوریتم فراابتکاری و تزریق ژنراتور پشتیبان!</div>` + log.innerHTML;
+
+      setTimeout(() => {
+        document.getElementById('totalDemand').innerText = '۲.۴۸ MW';
+        document.getElementById('totalDemand').style.color = '#fff';
+        document.getElementById('peakShave').innerText = '۳۱.۵ ٪';
+        document.getElementById('chpPower').innerText = '۰.۰۰ MW';
+        document.getElementById('chpPower').style.color = '#fff';
+        document.getElementById('bessPower').innerText = '۰.۸۵ MW (دشارژ)';
+        const timeReset = new Date().toLocaleTimeString('fa-IR');
+        log.innerHTML = `<div>[${timeReset}] [دیسپاچینگ] وضعیت بار با موفقیت متعادل و تثبیت شد.</div>` + log.innerHTML;
+      }, 8000);
+    }
+
+    // به‌روزرسانی زنده مقادیر گیج‌ها
+    setInterval(() => {
+      const f = (50.00 + (Math.random() - 0.5) * 0.04).toFixed(2);
+      const pf = (0.97 + Math.random() * 0.02).toFixed(2);
+      document.getElementById('freqCos').innerText = `${f} Hz | ${pf}`;
+    }, 2000);
+  </script>
+</body>
+</html>
